@@ -1,0 +1,6 @@
+$kind: http-request
+url: http://localhost:3000/products/69cf45f28231d19e6e5f1484
+method: DELETE
+auth:
+  type: noauth
+order: 4000

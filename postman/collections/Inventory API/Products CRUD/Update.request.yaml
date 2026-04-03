@@ -1,0 +1,9 @@
+$kind: http-request
+url: http://localhost:3000/products/69cf319aecba3edede70805a
+method: PATCH
+body:
+  type: json
+  content: "{\r\n  \"price\": 19.99\r\n}"
+auth:
+  type: noauth
+order: 3000

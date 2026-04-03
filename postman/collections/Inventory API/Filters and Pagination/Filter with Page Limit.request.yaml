@@ -1,0 +1,11 @@
+$kind: http-request
+url: http://localhost:3000/products?page=1&limit=5&sortBy=price&sortOrder=asc
+method: GET
+queryParams:
+  page: "1"
+  limit: "5"
+  sortBy: price
+  sortOrder: asc
+auth:
+  type: noauth
+order: 5000

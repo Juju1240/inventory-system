@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const { validateProduct } = require('../middleware/validate');
 
 // POST - Add a new product
-router.post('/', async (req, res) => {
+router.post('/', validateProduct, async (req, res) => {
   try {
     const product = await Product.create(req.body);
     res.status(201).json({

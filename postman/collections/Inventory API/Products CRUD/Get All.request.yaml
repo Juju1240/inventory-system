@@ -1,0 +1,6 @@
+$kind: http-request
+url: http://localhost:3000/products
+method: GET
+auth:
+  type: noauth
+order: 1000

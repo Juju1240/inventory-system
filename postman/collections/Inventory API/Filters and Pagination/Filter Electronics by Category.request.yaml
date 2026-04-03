@@ -1,0 +1,23 @@
+$kind: http-request
+url: http://localhost:3000/products?category=Electronics
+method: GET
+queryParams:
+  category: Electronics
+body:
+  type: text
+  content: "{\r
+
+    \  \"name\": \"Wireless charger\",\r
+
+    \  \"price\": 199.99,\r
+
+    \  \"category\": \"Electronics\",\r
+
+    \  \"quantity\": 30,\r
+
+    \  \"description\": \"High quality wireless charger\"\r
+
+    }"
+auth:
+  type: noauth
+order: 2000
