@@ -117,6 +117,38 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Adding Bulk Products",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"products\": [\r\n    {\r\n      \"name\": \"Gaming Mouse\",\r\n      \"price\": 49.99,\r\n      \"category\": \"Electronics\",\r\n      \"quantity\": 30\r\n    },\r\n    {\r\n      \"name\": \"Desk Lamp\",\r\n      \"price\": 24.99,\r\n      \"category\": \"Office\",\r\n      \"quantity\": 60\r\n    },\r\n    {\r\n      \"name\": \"Notebook\",\r\n      \"price\": 4.99,\r\n      \"category\": \"Stationery\",\r\n      \"quantity\": 500\r\n    },\r\n    {\r\n      \"name\": \"Water Bottle\",\r\n      \"price\": 14.99,\r\n      \"category\": \"Kitchen\",\r\n      \"quantity\": 150\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/products/bulk",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "products",
+                "bulk"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
