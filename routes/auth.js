@@ -1,9 +1,10 @@
 const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const users = [];
+const User = require('../models/User');
+
+const router = express.Router();
 
 // REGISTER
 router.post('/register', async (req, res) => {
@@ -14,13 +15,21 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    const existingUser = users.find(u => u.username === username);
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ error: 'JWT_SECRET is not configured' });
+    }
+
+    const existingUser = await User.findOne({ username: username.trim() });
     if (existingUser) {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ username, password: hashedPassword });
+
+    await User.create({
+      username: username.trim(),
+      password: hashedPassword
+    });
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
@@ -33,7 +42,15 @@ router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const user = users.find(u => u.username === username);
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ error: 'JWT_SECRET is not configured' });
+    }
+
+    const user = await User.findOne({ username: username.trim() });
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
@@ -44,7 +61,7 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { username },
+      { id: user._id, username: user.username },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );

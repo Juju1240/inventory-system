@@ -1,12 +1,22 @@
 const express = require('express');
-const router = express.Router();
+const mongoose = require('mongoose');
+
 const Product = require('../models/Product');
-const { validateProduct } = require('../middleware/validate');
+const {
+  validateProduct,
+  validateBulkProducts,
+  validateProductUpdate
+} = require('../middleware/validate');
+
+const router = express.Router();
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 // POST - Add a new product
 router.post('/', validateProduct, async (req, res) => {
   try {
     const product = await Product.create(req.body);
+
     res.status(201).json({
       message: 'Product created successfully',
       product
@@ -17,9 +27,10 @@ router.post('/', validateProduct, async (req, res) => {
 });
 
 // POST - Bulk insert (must be before /:id)
-router.post('/bulk', async (req, res) => {
+router.post('/bulk', validateBulkProducts, async (req, res) => {
   try {
     const products = await Product.insertMany(req.body.products);
+
     res.status(201).json({
       message: `${products.length} products inserted successfully`,
       products
@@ -59,7 +70,11 @@ router.get('/stats/analytics', async (req, res) => {
 
     res.json({
       byCategory: stats,
-      overall: overall[0]
+      overall: overall[0] || {
+        totalProducts: 0,
+        averagePrice: 0,
+        totalInventoryValue: 0
+      }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -81,13 +96,26 @@ router.get('/', async (req, res) => {
     } = req.query;
 
     const filter = {};
-    if (category) filter.category = category;
+
+    if (category) {
+      filter.category = category;
+    }
+
     if (minPrice || maxPrice) {
       filter.price = {};
-      if (minPrice) filter.price.$gte = Number(minPrice);
-      if (maxPrice) filter.price.$lte = Number(maxPrice);
+
+      if (minPrice) {
+        filter.price.$gte = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        filter.price.$lte = Number(maxPrice);
+      }
     }
-    if (search) filter.name = { $regex: search, $options: 'i' };
+
+    if (search) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
 
     const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
     const skip = (Number(page) - 1) * Number(limit);
@@ -113,10 +141,16 @@ router.get('/', async (req, res) => {
 // GET - Fetch single product by ID
 router.get('/:id', async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
     const product = await Product.findById(req.params.id);
+
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
+
     res.json(product);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -124,16 +158,22 @@ router.get('/:id', async (req, res) => {
 });
 
 // PATCH - Update a product
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', validateProductUpdate, async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
+
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
+
     res.json({
       message: 'Product updated successfully',
       product
@@ -146,10 +186,16 @@ router.patch('/:id', async (req, res) => {
 // DELETE - Remove a product
 router.delete('/:id', async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
     const product = await Product.findByIdAndDelete(req.params.id);
+
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
+
     res.json({ message: 'Product deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
